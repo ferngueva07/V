@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Login Pattern Radar"
+description = "An interactive sign-in security dashboard that helps teams understand login behavior, review unusual events, explore risk signals, and analyze uploaded activity logs."
+version = "1.0.0"
+id = "artifacts/login-pattern-radar"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23995
+
+[services.development]
+run = "pnpm --filter @workspace/login-pattern-radar run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/login-pattern-radar", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/login-pattern-radar/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23995"
+BASE_PATH = "/"
