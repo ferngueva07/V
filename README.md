@@ -25,6 +25,15 @@ pnpm --filter @workspace/scripts exec tsx --test tests/scanner.test.ts
 
 The production files are written to `artifacts/login-pattern-radar/dist/public`. Configure your web server to serve `index.html` for application routes.
 
+## Deploy manually to Netlify
+
+1. Run the frontend build command above.
+2. In Netlify, open the **existing site** and its **Deploys** page.
+3. Drag `artifacts/login-pattern-radar/dist/public` into the manual deployment area, or upload a ZIP containing that folder's contents.
+4. Wait for the deployment to publish. Verify the home page's inline **Upload a file** panel and open `/scan` directly.
+
+The build includes a `_redirects` file so refreshing client-side routes works on Netlify. Upload the built files, not the source repository. Deploy to the existing site to keep its URL.
+
 ## Deploy to Render
 
 The root `render.yaml` configures a static site, including the build command and client-side routing fallback. No API server, database, or application secrets are required.
@@ -39,6 +48,7 @@ Render assigns the live URL after creating the site. Subsequent pushes to the co
 ## Using the application
 
 - **Overview:** review summary metrics and unusual logins.
+- **Inline upload:** choose or drop files directly into the overview's upload panel. Supported login histories update the dashboard without leaving the page; other files keep the existing dataset. Use **View scan report** for per-file findings and coverage.
 - **Activity:** search and filter login events and inspect their signals.
 - **Test a login:** score a hypothetical sign-in against the current dataset.
 - **Scan files:** inspect multiple files for suspicious text patterns, risky file types, secrets, and login anomalies. Supported login logs include CSV, JSON/JSONL, Linux SSH auth logs, and Windows Security CSV exports.

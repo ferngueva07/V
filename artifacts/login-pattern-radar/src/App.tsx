@@ -5,7 +5,7 @@ import {
   Fingerprint, Gauge, Info, MapPin, Menu, Moon, RotateCcw, Search, ShieldAlert, ShieldCheck, Sun,
   ScanSearch, SlidersHorizontal, Sparkles, X,
 } from 'lucide-react';
-import { ScanFilesPage } from '@/pages/scan-files';
+import { FileUpload, ScanFilesPage } from '@/pages/scan-files';
 import type { UploadScanResult } from '@/lib/scanner';
 import { eventsToCsv, generateSampleEvents } from '@/lib/anomaly/sample-data';
 import { analyze, scoreProbe } from '@/lib/anomaly/pipeline';
@@ -151,6 +151,17 @@ function App() {
     updateParams(DEFAULT_PARAMS);
     setFileStatus({ kind: 'success', text: 'Demo events and model controls have been restored.' });
   }
+  function scanInline(next: UploadScanResult) {
+    setScan(next);
+    const checked = next.files.filter((file) => !file.error).length;
+    if (next.analysis) {
+      updateEvents(next.events, next.files.length === 1 ? next.files[0]!.name : `Uploaded files (${next.files.length})`);
+    }
+    setFileStatus({
+      kind: checked < next.files.length || next.analysisError ? 'error' : 'success',
+      text: `Checked ${checked} of ${next.files.length} files. ${next.analysis ? `Dashboard updated with ${next.events.length.toLocaleString()} login events.` : `Dashboard unchanged. ${next.analysisError ?? 'No scorable login history was found.'}`} Review the scan report for findings and coverage.`,
+    });
+  }
 
   const nav = [
     { href: '/', title: 'Overview', icon: Gauge, hint: '01' },
@@ -201,6 +212,10 @@ function App() {
           <div className="source-strip"><Info size={14} /><span><b>{source === 'Generated sample' ? 'Generated sample data' : 'Local dataset'}</b> — analysis runs in your browser. No live connection.</span>
             <button onClick={resetDemo} className="reset-link" data-testid="button-reset-demo"><RotateCcw size={13} /> Reset demo</button>
           </div>
+          {path === '/' && <>
+            <FileUpload compact params={params} onScan={scanInline} />
+            {scan && <div className="upload-result"><span>{scan.files.length} {scan.files.length === 1 ? 'file' : 'files'} in the latest scan</span><Link href="/scan" className="text-link" data-testid="link-scan-report">View scan report <ArrowRight size={14} /></Link></div>}
+          </>}
           {fileStatus && <div className={`notice ${fileStatus.kind}`} role="status" data-testid="status-import">{fileStatus.kind === 'success' ? <BadgeCheck size={16} /> : <ShieldAlert size={16} />}<span>{fileStatus.text}</span><button onClick={() => setFileStatus(null)} aria-label="Dismiss message"><X size={15} /></button></div>}
           {loading && <div className="loading-bar" role="status"><span /> Reading your local file…</div>}
           <div className="model-controls">

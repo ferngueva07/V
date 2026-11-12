@@ -1,4 +1,4 @@
-import { useState, type DragEvent } from 'react';
+import { useId, useRef, useState, type DragEvent } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowRight, ChevronDown, FileSearch, FileUp, ShieldAlert, ShieldCheck, UploadCloud } from 'lucide-react';
 import { formatLabel, scanUploads, type FileReport, type Severity, type UploadScanResult } from '@/lib/scanner';
@@ -41,29 +41,32 @@ function FileCard({ report }: { report: FileReport }) {
   </div>;
 }
 
-export function ScanFilesPage({ params, scan, setScan, onLoadEvents }: {
+export function FileUpload({ params, onScan, compact = false }: {
   params: ModelParams;
-  scan: UploadScanResult | null;
-  setScan: (s: UploadScanResult | null) => void;
-  onLoadEvents: (events: LoginEvent[], source: string) => void;
+  onScan: (scan: UploadScanResult) => void;
+  compact?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState('');
-  const [, navigate] = useLocation();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const scanningRef = useRef(false);
+  const inputId = useId();
 
   async function run(files: FileList | null | undefined) {
-    if (busy) return;
+    if (scanningRef.current) return;
     if (!files?.length) {
       setError('No files were selected. Drop files rather than folders.');
       return;
     }
-    setBusy(true); setError(''); setScan(null);
+    scanningRef.current = true;
+    setBusy(true); setError('');
     try {
-      setScan(await scanUploads(Array.from(files), params));
+      onScan(await scanUploads(Array.from(files), params));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The files could not be scanned.');
     } finally {
+      scanningRef.current = false;
       setBusy(false);
     }
   }
@@ -71,19 +74,39 @@ export function ScanFilesPage({ params, scan, setScan, onLoadEvents }: {
     e.preventDefault(); setDragging(false);
     void run(e.dataTransfer.files);
   }
-  const issues = scan ? scan.totals.critical + scan.totals.high + scan.totals.medium + scan.totals.low : 0;
+  const input = <input id={inputId} ref={fileRef} type="file" multiple className="sr-only" disabled={busy} onChange={(e) => { if (e.target.files?.length) void run(e.target.files); e.target.value = ''; }} data-testid={compact ? 'input-upload-file' : 'input-scan-files'} />;
+  const limits = 'Pattern matching is not antivirus. Only the first 20 MiB of each file is scanned; archives are not unpacked and binary files are not fully analyzed.';
 
-  return <section className="scan-layout">
-    <label htmlFor="scan-input" className={`scan-drop ${dragging ? 'scan-drop-active' : ''}`} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop} data-testid="dropzone-scan">
+  return <>
+    {compact ? <div className={`upload-zone ${dragging ? 'upload-zone-active' : ''}`} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop} aria-busy={busy} data-testid="dropzone-upload">
+      <div className="upload-icon"><UploadCloud size={21} /></div>
+      <div className="upload-copy"><b>{busy ? 'Scanning your files…' : 'Upload a file'}</b><span>Drop any files to scan locally, or import login CSV/JSON and SSH or Windows Security logs into this dashboard.</span></div>
+      <button className="button button-dark" type="button" disabled={busy} onClick={() => fileRef.current?.click()}>{busy ? 'Scanning…' : 'Choose file'}</button>
+      {input}
+    </div> : <label htmlFor={inputId} className={`scan-drop ${dragging ? 'scan-drop-active' : ''}`} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop} aria-busy={busy} data-testid="dropzone-scan">
       <div className="scan-drop-icon">{busy ? <FileSearch size={24} /> : <UploadCloud size={24} />}</div>
       <b>{busy ? 'Scanning…' : 'Drop files here or click to upload'}</b>
       <span>Any file type. Login logs (CSV, JSON/JSONL, Linux auth.log, Windows Security exports) are also checked for suspicious sign-ins.</span>
       <span className="scan-drop-note"><ShieldCheck size={13} /> Scanned entirely in your browser — nothing is uploaded to a server.</span>
-      <span>Pattern matching is not antivirus. Only the first 20 MiB of each file is scanned; archives are not unpacked and binary files are not fully analyzed.</span>
-      <input id="scan-input" type="file" multiple className="sr-only" disabled={busy} onChange={(e) => { void run(e.target.files); e.target.value = ''; }} data-testid="input-scan-files" />
-    </label>
-    {error && <div className="notice error"><ShieldAlert size={16} />{error}</div>}
+      <span>{limits}</span>
+      {input}
+    </label>}
+    {compact && <p className="upload-limits">{limits}</p>}
+    {error && <div className="notice error" role="alert"><ShieldAlert size={16} />{error}</div>}
+  </>;
+}
 
+export function ScanFilesPage({ params, scan, setScan, onLoadEvents }: {
+  params: ModelParams;
+  scan: UploadScanResult | null;
+  setScan: (s: UploadScanResult | null) => void;
+  onLoadEvents: (events: LoginEvent[], source: string) => void;
+}) {
+  const [, navigate] = useLocation();
+  const issues = scan ? scan.totals.critical + scan.totals.high + scan.totals.medium + scan.totals.low : 0;
+
+  return <section className="scan-layout">
+    <FileUpload params={params} onScan={setScan} />
     {scan && <>
       <div className="metrics-grid">
         <div className="metric-card"><div className="metric-top"><span>Files checked</span><i><FileUp size={16} /></i></div><strong>{scan.files.filter((f) => !f.error).length} / {scan.files.length}</strong><small>{scan.files.filter((f) => f.error).length} could not be read</small></div>

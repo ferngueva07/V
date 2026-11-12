@@ -1008,6 +1008,17 @@ tbody tr.flag-row .user-cell { color: #35443f; }
 .theme-toggle { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid #d8d5ca; border-radius: 6px; background: #f8f6ef; color: #47534f; cursor: pointer; }
 .theme-toggle:hover { background: #ebe9df; }
 .theme-toggle:focus-visible { outline: 2px solid #4b9889; outline-offset: 2px; }
+.upload-zone { display: flex; align-items: center; gap: 14px; margin-top: 10px; padding: 14px 16px; border: 1.5px dashed #c9d4c8; border-radius: 8px; background: rgba(255,255,255,.55); transition: border-color .15s, background .15s; }
+.upload-zone-active { background: #e9eee7; border-color: #578777; }
+.upload-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 auto; border-radius: 8px; background: #e9eee7; color: #578777; }
+.upload-copy { display: flex; flex-direction: column; flex: 1; gap: 2px; min-width: 0; }
+.upload-copy b { color: #202936; font-size: 13px; }
+.upload-copy span { color: #56655d; font-size: 11px; line-height: 1.4; }
+.upload-limits { margin: 6px 0 0; color: #68716a; font-size: 9px; line-height: 1.5; }
+.upload-result { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; color: #56655d; font-size: 10px; }
+@media (max-width: 640px) {
+  .upload-zone { flex-direction: column; align-items: flex-start; }
+}
 
 /* Dark workspace */
 .dark { color-scheme: dark; }
@@ -1020,6 +1031,11 @@ tbody tr.flag-row .user-cell { color: #35443f; }
 .dark .local-chip { color: #9bd6c3; }
 .dark .theme-toggle { color: #e2eee8; background: #25373c; border-color: #465e5b; }
 .dark .theme-toggle:hover { background: #344c4e; }
+.dark .upload-zone { background: #1d2b30; border-color: #60766d; }
+.dark .upload-zone-active { background: #29423b; border-color: #83bda5; }
+.dark .upload-icon { background: #355549; color: #b2e3ca; }
+.dark .upload-copy b { color: #e2eee7; }
+.dark :is(.upload-copy span, .upload-limits, .upload-result) { color: #bdcbc1; }
 .dark :is(.button-quiet, .button-outline) { color: #e0ebe5; border-color: #4a605b; background: #263a3c; }
 .dark :is(.button-quiet, .button-outline):hover { background: #344e4b; }
 .dark .button-dark { background: #a9dbc9; color: #142a25; }
