@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, Route, Switch, useLocation } from 'wouter';
 import {
   Activity, ArrowDownToLine, ArrowRight, ArrowUpRight, BadgeCheck, Clock3, FileUp,
-  Fingerprint, Gauge, Info, MapPin, Menu, RotateCcw, Search, ShieldAlert, ShieldCheck,
+  Fingerprint, Gauge, Info, MapPin, Menu, Moon, RotateCcw, Search, ShieldAlert, ShieldCheck, Sun,
   ScanSearch, SlidersHorizontal, Sparkles, X,
 } from 'lucide-react';
 import { ScanFilesPage } from '@/pages/scan-files';
@@ -16,6 +16,17 @@ import type { AnalysisResult, LoginEvent, ProbeResult, ScoredRow } from '@/lib/a
 type ModelParams = { contamination: number; windowMinutes: number; seed: number };
 const SEED = 7;
 const DEFAULT_PARAMS: ModelParams = { contamination: 0.08, windowMinutes: 30, seed: SEED };
+type Theme = 'light' | 'dark';
+
+function readThemePreference(): Theme | null {
+  try {
+    const saved = localStorage.getItem('lpr-theme');
+    return saved === 'light' || saved === 'dark' ? saved : null;
+  } catch (error) {
+    console.warn('Theme preference could not be read.', error);
+    return null;
+  }
+}
 
 function readStoredEvents(): LoginEvent[] {
   try {
@@ -47,6 +58,9 @@ const shortDate = (timestamp: string) => new Intl.DateTimeFormat('en', {
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
 function App() {
+  const [themePreference, setThemePreference] = useState<Theme | null>(readThemePreference);
+  const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const theme = themePreference ?? (systemDark ? 'dark' : 'light');
   const [events, setEvents] = useState<LoginEvent[]>(readStoredEvents);
   const [params, setParams] = useState<ModelParams>(readStoredParams);
   const [source, setSource] = useState(readStoredSource);
@@ -59,6 +73,25 @@ function App() {
   const [scan, setScan] = useState<UploadScanResult | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [path] = useLocation();
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateSystemTheme = (event: MediaQueryListEvent) => setSystemDark(event.matches);
+    setSystemDark(media.matches);
+    media.addEventListener('change', updateSystemTheme);
+    return () => media.removeEventListener('change', updateSystemTheme);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setThemePreference(next);
+    try { localStorage.setItem('lpr-theme', next); }
+    catch (error) { console.warn('Theme preference could not be saved.', error); }
+  }
 
   const analysisState = useMemo(() => {
     if (!events.length) return { result: null, error: null } as { result: AnalysisResult | null; error: string | null };
@@ -154,7 +187,7 @@ function App() {
         <header className="topbar">
           <button className="mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={19} /></button>
           <div className="breadcrumb"><span>WORKSPACE</span><i>/</i><b>{pageTitle}</b></div>
-          <div className="topbar-right"><span className="local-chip"><span className="status-dot" /> LOCAL ANALYSIS</span><span className="topbar-divider" /><span className="sample-name">{source}</span></div>
+          <div className="topbar-right"><span className="local-chip"><span className="status-dot" /> LOCAL ANALYSIS</span><span className="topbar-divider" /><span className="sample-name">{source}</span><button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} data-testid="button-theme">{theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</button></div>
         </header>
         <div className="page-body page-enter">
           <div className="page-heading">

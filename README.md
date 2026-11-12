@@ -13,6 +13,8 @@ pnpm --filter @workspace/login-pattern-radar run dev
 
 Open [http://localhost:5173](http://localhost:5173). Set `PORT` and `BASE_PATH` before starting Vite if you need different values; they default to `5173` and `/`.
 
+The theme follows your system setting until you use the theme button in the top bar. Your choice is saved in browser local storage.
+
 To check or build the application:
 
 ```sh
