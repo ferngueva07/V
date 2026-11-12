@@ -25,6 +25,17 @@ pnpm --filter @workspace/scripts exec tsx --test tests/scanner.test.ts
 
 The production files are written to `artifacts/login-pattern-radar/dist/public`. Configure your web server to serve `index.html` for application routes.
 
+## Deploy to Render
+
+The root `render.yaml` configures a static site, including the build command and client-side routing fallback. No API server, database, or application secrets are required.
+
+1. Sign in to [Render](https://dashboard.render.com/) and select **New > Blueprint**.
+2. Connect your GitHub account and grant Render access to `ferngueva07/V`.
+3. Select that repository and the `main` branch, then review and apply the Blueprint.
+4. Wait for the build to finish and open the site's assigned `onrender.com` URL. Check `/activity`, `/test`, and `/scan` directly as well as the home page.
+
+Render assigns the live URL after creating the site. Subsequent pushes to the connected branch can redeploy it automatically. Check the service settings and pricing before confirming deployment.
+
 ## Using the application
 
 - **Overview:** review summary metrics and unusual logins.

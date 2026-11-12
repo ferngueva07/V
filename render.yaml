@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: login-pattern-radar
+    runtime: static
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm --filter @workspace/login-pattern-radar run typecheck && corepack pnpm --filter @workspace/login-pattern-radar run build
+    staticPublishPath: artifacts/login-pattern-radar/dist/public
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
