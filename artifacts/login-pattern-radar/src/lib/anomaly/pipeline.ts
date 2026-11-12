@@ -108,6 +108,7 @@ export interface TrainedModel {
 export function train(events: LoginEvent[], params: ModelParams): TrainedModel {
   const features = computeFeatures(events, params.windowMinutes);
   if (features.length === 0) throw new Error("No successful logins to analyze.");
+  if (features.length === 1) throw new Error("At least two successful logins are needed to calculate an anomaly score.");
   const stats = populationStats(features);
   const X = features.map((f) => toVector(f, stats));
   const forest = new IsolationForest({ nTrees: 150, sampleSize: 256, seed: params.seed }).fit(X);

@@ -1,11 +1,10 @@
 import { analyze, type ModelParams } from "../anomaly/pipeline";
 import type { AnalysisResult, LoginEvent, ScoredRow } from "../anomaly/types";
-import { scanContent, severityRank, type Finding, type Severity } from "./content-scan";
+import { MAX_SCAN_BYTES, scanContent, severityRank, type Finding, type Severity } from "./content-scan";
 import { parseLoginLog, type LogFormat } from "./log-parsers";
 
 export type { Finding, Severity } from "./content-scan";
 
-export const MAX_FILE_BYTES = 100 * 1024 * 1024;
 const BRUTE_FORCE_FAILURES = 10;
 const SPRAY_USERS = 5;
 const IP_RE = /^(?:\d{1,3}(?:\.\d{1,3}){3}|[0-9a-f]*:[0-9a-f:]+)(?::\d+)?$/i;
@@ -18,6 +17,7 @@ export interface FileReport {
   kind: string | null;
   logFormat: LogFormat | null;
   loginEvents: number;
+  skippedLogRecords: number;
   truncated: boolean;
   error: string | null;
   findings: Finding[];
@@ -30,6 +30,7 @@ export interface UploadScanResult {
   /** Model-flagged logins with the file each came from. */
   flaggedLogins: (ScoredRow & { file: string })[];
   analysis: AnalysisResult | null;
+  analysisError: string | null;
   totals: Record<Severity, number>;
 }
 
@@ -108,19 +109,18 @@ async function sha256(bytes: Uint8Array<ArrayBuffer>): Promise<string | null> {
 const worstOf = (findings: Finding[]): Severity | null =>
   findings.reduce<Severity | null>((w, f) => (w === null || severityRank(f.severity) < severityRank(w) ? f.severity : w), null);
 
-export async function scanFile(file: { name: string; size: number; arrayBuffer(): Promise<ArrayBuffer> }): Promise<{ report: FileReport; events: LoginEvent[] }> {
-  const base: FileReport = { name: file.name, size: file.size, sha256: null, kind: null, logFormat: null, loginEvents: 0, truncated: false, error: null, findings: [], worst: null };
-  if (file.size > MAX_FILE_BYTES) {
-    return { report: { ...base, error: `File is larger than ${MAX_FILE_BYTES / 1024 / 1024} MB and was not scanned.` }, events: [] };
-  }
+export async function scanFile(file: Pick<File, "name" | "size" | "slice">): Promise<{ report: FileReport; events: LoginEvent[] }> {
+  const truncated = file.size > MAX_SCAN_BYTES;
+  const base: FileReport = { name: file.name, size: file.size, sha256: null, kind: null, logFormat: null, loginEvents: 0, skippedLogRecords: 0, truncated, error: null, findings: [], worst: null };
   try {
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const [hash, content] = [await sha256(bytes), scanContent(file.name, bytes)];
+    const bytes = new Uint8Array(await file.slice(0, MAX_SCAN_BYTES).arrayBuffer());
+    const hash = truncated ? null : await sha256(bytes);
+    const content = scanContent(file.name, bytes);
     const log = content.text ? parseLoginLog(content.text, file.name) : null;
     const events = log?.events ?? [];
     const findings = [...content.findings, ...loginHeuristics(events)].sort((a, b) => severityRank(a.severity) - severityRank(b.severity));
     return {
-      report: { ...base, sha256: hash, kind: content.kind, logFormat: log?.format ?? null, loginEvents: events.length, truncated: content.truncated, findings, worst: worstOf(findings) },
+      report: { ...base, sha256: hash, kind: content.kind, logFormat: log?.format ?? null, loginEvents: events.length, skippedLogRecords: log?.skipped ?? 0, findings, worst: worstOf(findings) },
       events,
     };
   } catch (err) {
@@ -128,7 +128,7 @@ export async function scanFile(file: { name: string; size: number; arrayBuffer()
   }
 }
 
-export async function scanUploads(files: Iterable<File>, params: ModelParams): Promise<UploadScanResult> {
+export async function scanUploads(files: Iterable<Pick<File, "name" | "size" | "slice">>, params: ModelParams): Promise<UploadScanResult> {
   const reports: FileReport[] = [];
   const events: LoginEvent[] = [];
   const fileOf = new Map<string, string>();
@@ -144,8 +144,11 @@ export async function scanUploads(files: Iterable<File>, params: ModelParams): P
   }
 
   let analysis: AnalysisResult | null = null;
+  let analysisError: string | null = null;
   if (events.some((e) => e.success)) {
-    try { analysis = analyze(events, params); } catch { analysis = null; }
+    try { analysis = analyze(events, params); } catch (err) {
+      analysisError = err instanceof Error ? err.message : "Login analysis could not be completed.";
+    }
   }
   const flaggedLogins = (analysis?.rows ?? [])
     .filter((r) => r.isAnomaly)
@@ -154,5 +157,5 @@ export async function scanUploads(files: Iterable<File>, params: ModelParams): P
 
   const totals: Record<Severity, number> = { critical: 0, high: 0, medium: 0, low: 0 };
   for (const r of reports) for (const f of r.findings) totals[f.severity]++;
-  return { files: reports, events, flaggedLogins, analysis, totals };
+  return { files: reports, events, flaggedLogins, analysis, analysisError, totals };
 }

@@ -23,7 +23,7 @@ interface TextRule {
 }
 
 const MAX_SAMPLES = 5;
-const MAX_SCAN_BYTES = 20 * 1024 * 1024;
+export const MAX_SCAN_BYTES = 20 * 1024 * 1024;
 
 const TEXT_RULES: TextRule[] = [
   // Secrets / credentials
@@ -35,7 +35,7 @@ const TEXT_RULES: TextRule[] = [
   { id: "google-api-key", title: "Google API key", severity: "medium", category: "secret", redact: true, description: "Looks like a Google API key.", pattern: /\bAIza[0-9A-Za-z_-]{35}\b/g },
   { id: "jwt", title: "JSON Web Token", severity: "medium", category: "secret", redact: true, description: "A bearer token (JWT) that may grant access until it expires.", pattern: /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g },
   { id: "credential-url", title: "Credentials in URL", severity: "medium", category: "secret", redact: true, description: "A connection string or URL with an embedded username and password.", pattern: /\b[a-z][a-z0-9+.-]*:\/\/[^\s:/@"']+:[^\s@/"']{3,}@[^\s"']+/gi },
-  { id: "password-assignment", title: "Hard-coded password or secret", severity: "medium", category: "secret", redact: true, description: "A password, secret, or API key assigned to a literal value.", pattern: /\b(?:password|passwd|pwd|secret|api[_-]?key|access[_-]?token|client[_-]?secret)["']?\s*[:=]\s*["']?(?!\$\{|<|\*{3}|changeme|null|none|true|false)[^\s"',;]{6,}/gi },
+  { id: "password-assignment", title: "Hard-coded password or secret", severity: "medium", category: "secret", redact: true, description: "A password, secret, or API key assigned to a literal value.", pattern: /\b(?:password|passwd|pwd|secret|api[_-]?key|access[_-]?token|client[_-]?secret)["']?\s*[:=]\s*["']?(?!\$\{|<|\*{3}|changeme|null|none|true|false)[^\x00\s"',;]{6,}/gi },
 
   // Malware / attacker tooling
   { id: "eicar", title: "EICAR antivirus test file", severity: "critical", category: "malware", description: "The industry-standard antivirus test signature. Harmless, but every scanner treats it as malware.", pattern: /X5O!P%@AP\[4\\PZX54\(P\^\)7CC\)7\}\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\$H\+H\*/g },

@@ -114,7 +114,7 @@ const str = (v: unknown) => (v === null || v === undefined ? "" : String(v).trim
 
 function recordsToEvents(records: Record<string, unknown>[], prefix: string): { events: LoginEvent[]; skipped: number; windows: boolean } {
   const events: LoginEvent[] = [];
-  let skipped = 0;
+  let skipped = Math.max(0, records.length - MAX_EVENTS);
   let windows = false;
   records.slice(0, MAX_EVENTS).forEach((rec, n) => {
     const keys = Object.keys(rec);
@@ -149,11 +149,15 @@ function parseAuthLog(text: string, prefix: string, referenceYear: number): Pars
   const events: LoginEvent[] = [];
   let skipped = 0;
   const lines = text.split(/\r?\n/);
-  for (let n = 0; n < lines.length && events.length < MAX_EVENTS; n++) {
+  for (let n = 0; n < lines.length; n++) {
     const line = lines[n]!;
     const ssh = SSH_RE.exec(line);
     const invalid = ssh ? null : SSH_INVALID_RE.exec(line);
     if (!ssh && !invalid) continue;
+    if (events.length >= MAX_EVENTS) {
+      skipped++;
+      continue;
+    }
     let time = NaN;
     const iso = /^(\d{4}-\d\d-\d\dT\S+)/.exec(line);
     const classic = /^([A-Z][a-z]{2})\s+(\d{1,2})\s+(\d\d):(\d\d):(\d\d)/.exec(line);
