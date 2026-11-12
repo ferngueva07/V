@@ -3,11 +3,14 @@ import { Link, Route, Switch, useLocation } from 'wouter';
 import {
   Activity, ArrowDownToLine, ArrowRight, ArrowUpRight, BadgeCheck, Clock3, FileUp,
   Fingerprint, Gauge, Info, MapPin, Menu, RotateCcw, Search, ShieldAlert, ShieldCheck,
-  SlidersHorizontal, Sparkles, X,
+  ScanSearch, SlidersHorizontal, Sparkles, X,
 } from 'lucide-react';
+import { ScanFilesPage } from '@/pages/scan-files';
+import type { UploadScanResult } from '@/lib/scanner';
 import { eventsToCsv, generateSampleEvents } from '@/lib/anomaly/sample-data';
 import { analyze, scoreProbe } from '@/lib/anomaly/pipeline';
 import { parseLoginCsv } from '@/lib/anomaly/csv';
+import { parseLoginLog } from '@/lib/scanner/log-parsers';
 import type { AnalysisResult, LoginEvent, ProbeResult, ScoredRow } from '@/lib/anomaly/types';
 
 type ModelParams = { contamination: number; windowMinutes: number; seed: number };
@@ -53,6 +56,7 @@ function App() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
+  const [scan, setScan] = useState<UploadScanResult | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [path] = useLocation();
 
@@ -82,7 +86,15 @@ function App() {
     setLoading(true);
     setFileStatus(null);
     try {
-      const parsed = parseLoginCsv(await file.text());
+      const text = await file.text();
+      let parsed: LoginEvent[];
+      try {
+        parsed = parseLoginCsv(text);
+      } catch (csvErr) {
+        const log = parseLoginLog(text, file.name);
+        if (!log?.events.some((e) => e.success)) throw csvErr;
+        parsed = log.events;
+      }
       updateEvents(parsed, file.name);
       setFileStatus({ kind: 'success', text: `Imported ${parsed.length.toLocaleString()} events from ${file.name}.` });
     } catch (err) {
@@ -111,8 +123,10 @@ function App() {
     { href: '/', title: 'Overview', icon: Gauge, hint: '01' },
     { href: '/activity', title: 'Activity', icon: Activity, hint: '02' },
     { href: '/test', title: 'Test a login', icon: Sparkles, hint: '03' },
+    { href: '/scan', title: 'Scan files', icon: ScanSearch, hint: '04' },
   ];
-  const pageTitle = path === '/activity' ? 'Login activity' : path === '/test' ? 'Test a login' : 'Analysis overview';
+  const isScan = path === '/scan';
+  const pageTitle = path === '/activity' ? 'Login activity' : path === '/test' ? 'Test a login' : isScan ? 'Scan files' : 'Analysis overview';
   return (
     <div className="app-root min-h-[100dvh] text-[#202936]">
       <div className="app-noise" aria-hidden="true" />
@@ -144,10 +158,10 @@ function App() {
         </header>
         <div className="page-body page-enter">
           <div className="page-heading">
-            <div><div className="eyebrow"><span className="eyebrow-line" />SIGN-IN BEHAVIOR / {path === '/' ? 'CURRENT READOUT' : path === '/activity' ? 'EVENT EXPLORER' : 'SCENARIO LAB'}</div><h1 className="display">{pageTitle}</h1></div>
+            <div><div className="eyebrow"><span className="eyebrow-line" />SIGN-IN BEHAVIOR / {path === '/' ? 'CURRENT READOUT' : path === '/activity' ? 'EVENT EXPLORER' : isScan ? 'THREAT SCAN' : 'SCENARIO LAB'}</div><h1 className="display">{pageTitle}</h1></div>
             <div className="heading-actions">
-              <label className="button button-quiet import-button" htmlFor="csv-import"><FileUp size={15} /> Import CSV</label>
-              <input id="csv-import" ref={fileRef} type="file" accept=".csv,text/csv" className="sr-only" onChange={(e) => void importFile(e.target.files?.[0])} data-testid="input-import-csv" />
+              <label className="button button-quiet import-button" htmlFor="csv-import"><FileUp size={15} /> Import log</label>
+              <input id="csv-import" ref={fileRef} type="file" accept=".csv,.json,.jsonl,.log,.txt,text/csv,application/json,text/plain" className="sr-only" onChange={(e) => void importFile(e.target.files?.[0])} data-testid="input-import-csv" />
               <button className="button button-dark" onClick={exportEvents} disabled={!events.length} data-testid="button-export-events"><ArrowDownToLine size={15} /> Export</button>
             </div>
           </div>
@@ -162,9 +176,10 @@ function App() {
             <label className="control-field contamination-control"><span>Contamination <b className="mono">{Math.round(params.contamination * 100)}%</b></span><input type="range" min="2" max="20" step="1" value={Math.round(params.contamination * 100)} onChange={(e) => updateParams({ ...params, contamination: Number(e.target.value) / 100 })} data-testid="input-contamination" /></label>
             <span className="control-recalc"><span className="recalc-dot" /> LIVE RECALC</span>
           </div>
-          {analysisState.error && <div className="error-panel"><ShieldAlert size={21} /><div><b>We couldn’t score these events</b><p>{analysisState.error}</p><button onClick={resetDemo} className="button button-dark"><RotateCcw size={14} /> Restore demo data</button></div></div>}
-          {!analysisState.error && !result && <div className="empty-panel"><div className="empty-icon"><Activity size={22} /></div><h2>No events to analyze</h2><p>Import a CSV with at least one successful login, or start again with the generated sample.</p><button className="button button-dark" onClick={resetDemo}>Load demo events <ArrowRight size={15} /></button></div>}
-          {result && <Switch>
+          {isScan && <ScanFilesPage params={params} scan={scan} setScan={setScan} onLoadEvents={(next, label) => { updateEvents(next, label); setFileStatus({ kind: 'success', text: `Loaded ${next.length.toLocaleString()} login events from uploaded files.` }); }} />}
+          {!isScan && analysisState.error && <div className="error-panel"><ShieldAlert size={21} /><div><b>We couldn’t score these events</b><p>{analysisState.error}</p><button onClick={resetDemo} className="button button-dark"><RotateCcw size={14} /> Restore demo data</button></div></div>}
+          {!isScan && !analysisState.error && !result && <div className="empty-panel"><div className="empty-icon"><Activity size={22} /></div><h2>No events to analyze</h2><p>Import a CSV with at least one successful login, or start again with the generated sample.</p><button className="button button-dark" onClick={resetDemo}>Load demo events <ArrowRight size={15} /></button></div>}
+          {!isScan && result && <Switch>
             <Route path="/activity"><ActivityPage events={events} result={result} search={search} setSearch={setSearch} statusFilter={statusFilter} setStatusFilter={setStatusFilter} selectedId={selectedId} setSelectedId={setSelectedId} selectedRow={selectedRow} /></Route>
             <Route path="/test"><TestPage events={events} result={result} params={params} /></Route>
             <Route path="/"><Overview result={result} params={params} /></Route>

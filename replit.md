@@ -28,6 +28,8 @@ Browser-based workspace for reviewing sign-in activity and exploring explainable
 - `artifacts/login-pattern-radar/src/App.tsx` — website routes, dashboard state, and interactions
 - `artifacts/login-pattern-radar/src/index.css` — website theme and responsive styling
 - `artifacts/login-pattern-radar/src/lib/anomaly/` — login-event parsing, sample generation, feature extraction, and scoring
+- `artifacts/login-pattern-radar/src/lib/scanner/` — multi-format login-log parsers, content threat rules, and upload scan orchestration
+- `artifacts/login-pattern-radar/src/pages/scan-files.tsx` — the file-scan page
 - `lib/api-spec/openapi.yaml` — shared API contract (the current website does not use it)
 
 ## Architecture decisions
@@ -41,7 +43,8 @@ Browser-based workspace for reviewing sign-in activity and exploring explainable
 - `/` — overview of the current analysis and model controls
 - `/activity` — searchable event history with signal-by-signal explanations
 - `/test` — score a hypothetical sign-in against a selected user's history
-- CSV import/export and demo reset are available from the shared workspace shell.
+- `/scan` — upload any files (drag-and-drop, multiple) to scan in-browser for secrets, malware/attacker tooling, attack payloads, disguised executables, and suspicious logins (brute force, password spraying, privileged logins, plus the anomaly model). Parsed logins can be opened in Activity.
+- Log import/export and demo reset are available from the shared workspace shell. Import accepts the login CSV format plus JSON/JSONL, Linux auth.log (sshd), and Windows Security CSV exports.
 
 ## User preferences
 
@@ -49,7 +52,8 @@ No persistent user preferences recorded.
 
 ## Gotchas
 
-- CSV imports must include `user_id`, `timestamp`, `location`, and `success` columns; files are limited to 50,000 rows.
+- Login CSVs should include `user_id`, `timestamp`, `location`, and `success` columns (common aliases like `username`, `ip`, `status` also work via the scanner parsers); files are limited to 50,000 rows.
+- The file scanner is pattern-based, not antivirus: a clean result is not a guarantee of safety. Syslog lines without a year are assumed to be in the current year.
 - The website currently has no user accounts, live log ingestion, or cross-device persistence.
 
 ## Pointers
