@@ -1,0 +1,10 @@
+2026/10/26 06:25:01 [notice] 1#1: using the "epoll" event method
+2026/10/26 06:25:01 [notice] 1#1: start worker processes
+2026/10/26 09:15:22 [error] 30#30: *221 open() "/usr/share/nginx/html/favicon.ico" failed (2: No such file or directory), client: 192.0.2.10, server: shop.example.com, request: "GET /favicon.ico HTTP/1.1", host: "shop.example.com", referrer: "https://shop.example.com/"
+2026/10/26 10:02:44 [warn] 30#30: *305 a client request body is buffered to a temporary file /var/cache/nginx/client_temp/0000000001, client: 192.0.2.25, server: shop.example.com, request: "POST /account/avatar HTTP/1.1", host: "shop.example.com", referrer: "https://shop.example.com/account"
+2026/10/26 12:31:09 [error] 30#30: *518 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 192.0.2.33, server: shop.example.com, request: "GET /reports/annual HTTP/1.1", upstream: "http://127.0.0.1:8080/reports/annual", host: "shop.example.com", referrer: "https://shop.example.com/reports"
+2026/10/26 14:48:57 [error] 30#30: *702 user "editor": password mismatch, client: 192.0.2.44, server: shop.example.com, request: "GET /admin/ HTTP/1.1", host: "shop.example.com"
+2026/10/26 16:20:13 [error] 30#30: *811 open() "/usr/share/nginx/html/apple-touch-icon.png" failed (2: No such file or directory), client: 192.0.2.61, server: shop.example.com, request: "GET /apple-touch-icon.png HTTP/1.1", host: "shop.example.com"
+2026/10/26 23:59:58 [notice] 1#1: signal 3 (SIGQUIT) received from 1, shutting down
+2026/10/26 23:59:58 [notice] 31#31: gracefully shutting down
+2026/10/26 23:59:58 [notice] 31#31: exiting

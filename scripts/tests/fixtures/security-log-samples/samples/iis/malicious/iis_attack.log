@@ -1,0 +1,9 @@
+#Software: Microsoft Internet Information Services 10.0
+#Version: 1.0
+#Date: 2024-01-15 14:30:00
+#Fields: date time s-ip cs-method cs-uri-stem cs-uri-query s-port cs-username c-ip cs(User-Agent) sc-status sc-substatus sc-win32-status time-taken sc-bytes
+2024-01-15 14:30:01 10.0.0.10 GET /admin/web.config - 80 - 198.51.100.25 sqlmap/1.7+(https://sqlmap.org) 403 0 0 15 1450
+2024-01-15 14:30:02 10.0.0.10 GET /../../etc/passwd - 80 - 198.51.100.25 python-requests/2.28.0 400 0 0 0 512
+2024-01-15 14:30:03 10.0.0.10 POST /api/v1/login - 443 - 198.51.100.8 python-requests/2.28.0 401 0 0 203 89
+2024-01-15 14:30:04 10.0.0.10 GET /admin/users.aspx ?action=export 443 - 198.51.100.8 python-requests/2.28.0 200 0 0 4875 524288
+2024-01-15 14:30:05 10.0.0.10 GET /.git/config - 80 - 198.51.100.25 python-requests/2.28.0 403 0 0 16 512

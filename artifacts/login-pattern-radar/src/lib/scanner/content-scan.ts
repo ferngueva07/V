@@ -9,7 +9,7 @@ export interface Finding {
   /** Total matches for this rule in the file. */
   count: number;
   /** A few example locations, with secrets redacted. */
-  samples: { line?: number; text: string }[];
+  samples: { line?: number; record?: number; text: string }[];
 }
 
 interface TextRule {
@@ -118,6 +118,13 @@ export function scanText(text: string, binary = false): Finding[] {
     let count = 0;
     const samples: Finding["samples"] = [];
     for (const m of text.matchAll(re)) {
+      // sudo logs use PWD for the working directory, not a password.
+      if (rule.id === "password-assignment" && /^PWD=\//.test(m[0])) continue;
+      if (rule.id === "password-assignment" && /^pwd["']\s*:\s*["']\//i.test(m[0])) {
+        const index = m.index ?? 0;
+        const line = text.slice(text.lastIndexOf("\n", index) + 1, text.indexOf("\n", index) < 0 ? text.length : text.indexOf("\n", index));
+        if (/"command"\s*:/.test(line)) continue;
+      }
       count++;
       if (samples.length < MAX_SAMPLES) {
         const raw = m[0].replace(/\s+/g, " ").slice(0, 160);

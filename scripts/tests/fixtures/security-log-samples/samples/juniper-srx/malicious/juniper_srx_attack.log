@@ -1,0 +1,6 @@
+Jan 15 14:30:01 srx-fw-01 RT_FLOW: RT_FLOW_SESSION_DENY: session denied 198.51.100.25/54321->10.0.0.50/22 junos-ssh 6(0) deny-all untrust trust UNKNOWN UNKNOWN N/A(N/A) ge-0/0/0.0 No policy deny
+Jan 15 14:30:05 srx-fw-01 RT_FLOW: RT_FLOW_SESSION_DENY: session denied 198.51.100.25/54322->10.0.0.50/22 junos-ssh 6(0) deny-all untrust trust UNKNOWN UNKNOWN N/A(N/A) ge-0/0/0.0 No policy deny
+Jan 15 14:32:00 srx-fw-01 RT_FLOW: RT_FLOW_SESSION_DENY: session denied 198.51.100.8/44000->10.0.0.100/443 junos-https 6(0) deny-malicious untrust trust UNKNOWN UNKNOWN N/A(N/A) ge-0/0/0.0 No policy deny
+Jan 15 14:33:00 srx-fw-01 RT_FLOW: RT_FLOW_SESSION_DENY: session denied 198.51.100.25/54400->10.0.0.100/8080 None 6(0) deny-all untrust trust UNKNOWN UNKNOWN N/A(N/A) ge-0/0/0.0 No policy deny
+Jan 15 14:35:00 srx-fw-01 RT_FLOW: RT_FLOW_SESSION_DENY: session denied 198.51.100.25/54500->10.0.0.50/161 junos-snmp-get 17(0) deny-all untrust trust UNKNOWN UNKNOWN N/A(N/A) ge-0/0/0.0 No policy deny
+Jan 15 14:36:00 srx-fw-01 RT_FLOW: RT_FLOW_SESSION_DENY: session denied 198.51.100.25/54600->10.0.0.1/23 junos-telnet 6(0) deny-telnet untrust trust UNKNOWN UNKNOWN N/A(N/A) ge-0/0/0.0 No policy deny

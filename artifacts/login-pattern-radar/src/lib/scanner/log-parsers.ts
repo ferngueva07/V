@@ -1,6 +1,8 @@
 import type { LoginEvent } from "../anomaly/types";
+import { field, readLogRecords, parseCsvRows } from "./log-records";
+export { parseCsvRows } from "./log-records";
 
-export type LogFormat = "login-csv" | "windows-security" | "json" | "auth-log";
+export type LogFormat = "login-csv" | "windows-security" | "json" | "auth-log" | "auditd";
 
 export interface ParsedLog {
   format: LogFormat;
@@ -10,37 +12,6 @@ export interface ParsedLog {
 }
 
 const MAX_EVENTS = 50_000;
-
-/** Splits CSV text into rows, honouring quoted fields that may contain commas or newlines. */
-export function parseCsvRows(text: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let cur = "";
-  let quoted = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (quoted) {
-      if (ch === '"' && text[i + 1] === '"') {
-        cur += '"';
-        i++;
-      } else if (ch === '"') quoted = false;
-      else cur += ch;
-    } else if (ch === '"') quoted = true;
-    else if (ch === ",") {
-      row.push(cur.trim());
-      cur = "";
-    } else if (ch === "\n" || ch === "\r") {
-      if (ch === "\r" && text[i + 1] === "\n") i++;
-      row.push(cur.trim());
-      if (row.some((c) => c.length)) rows.push(row);
-      row = [];
-      cur = "";
-    } else cur += ch;
-  }
-  row.push(cur.trim());
-  if (row.some((c) => c.length)) rows.push(row);
-  return rows;
-}
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
@@ -200,6 +171,44 @@ function tryJson(text: string): Record<string, unknown>[] | null {
 export function parseLoginLog(text: string, fileName: string, referenceYear = new Date().getUTCFullYear()): ParsedLog | null {
   const prefix = fileName.replace(/[^a-z0-9]+/gi, "_").slice(0, 40) || "file";
   const trimmed = text.trimStart();
+  const auditFile = /\btype=USER_(?:AUTH|LOGIN)\b/.test(text);
+
+  if (/^[{[<]/.test(trimmed) || auditFile) {
+    const records = readLogRecords(text);
+    const events: LoginEvent[] = [];
+    let skipped = 0;
+    let windows = false;
+    let auditd = false;
+    for (const [i, record] of records.entries()) {
+      const category = field(record, "event.category", "event.category.0");
+      if (category && category !== "authentication") continue;
+      const eventType = field(record, "eventtype");
+      if (eventType && !/(?:login|auth|session)/i.test(eventType)) continue;
+      const eventId = field(record, "eventid");
+      windows ||= !!eventId && !!field(record, "provider");
+      if (eventId && field(record, "provider") && successFromEventId(eventId) === null) continue;
+      const audit = /\btype=USER_(?:AUTH|LOGIN)\b/.test(record.text);
+      auditd ||= audit;
+      if (auditFile && !audit) continue;
+      const message = Object.values(record.fields).find((value) => /Account Name:/i.test(value));
+      const winMsg = message ? fromWindowsMessage(message) : {};
+      const user = field(record, "userprincipalname", "targetusername", "actor.alternateid", "user.name", "resource.email", "initiatedby.username", "acct", ...USER_KEYS) || winMsg.user || "";
+      const location = field(record, "ipaddress", "client.ipaddress", "accessdevice.ip", "clientip", "source.ip", "addr", ...LOCATION_KEYS) || winMsg.location || "";
+      let success = successFromEventId(eventId);
+      const errorCode = field(record, "status.errorcode");
+      if (errorCode) success = errorCode === "0";
+      success ??= parseSuccess(field(record, "success", "outcome.result", "result", "status", "event.outcome", "res", ...SUCCESS_KEYS));
+      // USER_ERR and syscall audit records are not additional login attempts.
+      if (field(record, "type") && /^USER_/.test(field(record, "type")) && !audit) continue;
+      const time = audit
+        ? Number(/msg=audit\(([\d.]+):/.exec(record.text)?.[1]) * 1000
+        : parseTime(field(record, "createddatetime", "timestamp", "published", "time", "eventtime", "@timestamp", ...TIME_KEYS));
+      if (success === null || !user || !Number.isFinite(time)) { skipped++; continue; }
+      if (events.length >= MAX_EVENTS) { skipped++; continue; }
+      events.push(makeEvent(i + 1, prefix, user, time, location, success));
+    }
+    if (events.length) return { format: windows ? "windows-security" : auditd ? "auditd" : "json", events, skipped };
+  }
 
   if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
     const records = tryJson(trimmed);

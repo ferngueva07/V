@@ -33,7 +33,7 @@ function FileCard({ report }: { report: FileReport }) {
       {report.findings.map((f) => <div className="finding" key={f.ruleId}>
         <div className="finding-head"><SeverityPill severity={f.severity} /><b>{f.title}</b><span className="finding-cat">{f.category.toUpperCase()}</span>{f.count > 1 && <span className="finding-count mono">×{f.count}</span>}</div>
         <p>{f.description}</p>
-        {f.samples.length > 0 && <ul className="finding-samples">{f.samples.map((s, i) => <li key={i}>{s.line && <span className="mono">L{s.line}</span>}<code>{s.text}</code></li>)}</ul>}
+        {f.samples.length > 0 && <ul className="finding-samples">{f.samples.map((s, i) => <li key={i}>{s.line ? <span className="mono">L{s.line}</span> : s.record ? <span className="mono">R{s.record}</span> : null}<code>{s.text}</code></li>)}</ul>}
       </div>)}
       {report.sha256 && <div className="scan-hash"><span>SHA-256</span><code>{report.sha256}</code></div>}
       {!report.sha256 && !report.truncated && !report.error && <div className="scan-hash">SHA-256 unavailable in this browser.</div>}
@@ -80,13 +80,13 @@ export function FileUpload({ params, onScan, compact = false }: {
   return <>
     {compact ? <div className={`upload-zone ${dragging ? 'upload-zone-active' : ''}`} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop} aria-busy={busy} data-testid="dropzone-upload">
       <div className="upload-icon"><UploadCloud size={21} /></div>
-      <div className="upload-copy"><b>{busy ? 'Scanning your files…' : 'Upload a file'}</b><span>Drop any files to scan locally, or import login CSV/JSON and SSH or Windows Security logs into this dashboard.</span></div>
+      <div className="upload-copy"><b>{busy ? 'Scanning your files…' : 'Upload a file'}</b><span>Drop files to inspect security logs and suspicious content locally. Supported login histories also update this dashboard.</span></div>
       <button className="button button-dark" type="button" disabled={busy} onClick={() => fileRef.current?.click()}>{busy ? 'Scanning…' : 'Choose file'}</button>
       {input}
     </div> : <label htmlFor={inputId} className={`scan-drop ${dragging ? 'scan-drop-active' : ''}`} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop} aria-busy={busy} data-testid="dropzone-scan">
       <div className="scan-drop-icon">{busy ? <FileSearch size={24} /> : <UploadCloud size={24} />}</div>
       <b>{busy ? 'Scanning…' : 'Drop files here or click to upload'}</b>
-      <span>Any file type. Login logs (CSV, JSON/JSONL, Linux auth.log, Windows Security exports) are also checked for suspicious sign-ins.</span>
+      <span>Any file type. Inspect cloud, identity, firewall, web, endpoint, and other security logs in JSON/JSONL, CSV, XML, or text exports.</span>
       <span className="scan-drop-note"><ShieldCheck size={13} /> Scanned entirely in your browser — nothing is uploaded to a server.</span>
       <span>{limits}</span>
       {input}

@@ -21,6 +21,7 @@ To check or build the application:
 pnpm --filter @workspace/login-pattern-radar run typecheck
 pnpm --filter @workspace/login-pattern-radar run build
 pnpm --filter @workspace/scripts exec tsx --test tests/scanner.test.ts
+pnpm --filter @workspace/scripts exec tsx --test tests/corpus.test.ts
 ```
 
 The production files are written to `artifacts/login-pattern-radar/dist/public`. Configure your web server to serve `index.html` for application routes.
@@ -51,9 +52,19 @@ Render assigns the live URL after creating the site. Subsequent pushes to the co
 - **Inline upload:** choose or drop files directly into the overview's upload panel. Supported login histories update the dashboard without leaving the page; other files keep the existing dataset. Use **View scan report** for per-file findings and coverage.
 - **Activity:** search and filter login events and inspect their signals.
 - **Test a login:** score a hypothetical sign-in against the current dataset.
-- **Scan files:** inspect multiple files for suspicious text patterns, risky file types, secrets, and login anomalies. Supported login logs include CSV, JSON/JSONL, Linux SSH auth logs, and Windows Security CSV exports.
+- **Scan files:** inspect multiple files for suspicious text patterns, risky file types, secrets, and security events. Findings include severity, an explanation, and example evidence. `L` identifies a physical line; `R` identifies a structured record (including the header for CSV).
 
 Login CSVs use `user_id`, `timestamp`, `location`, and `success` columns. The import and scanner also recognize some common alternatives. CSV login imports are limited to 50,000 rows. The scanner accepts files of any type or size, but reads only the first 20 MiB of each; it reports partial scans and does not calculate a full-file hash for them. Login parsing is also capped at 50,000 records per file. Classic syslog timestamps without a year are interpreted using the current year.
+
+Security inspection handles JSON arrays, common export wrappers, JSONL, CSV, Windows/Sysmon XML exports, and text logs. Rules cover web attack payloads and reconnaissance, cloud/SaaS privilege and security-control changes, MFA issues, implausible sign-in travel, Kubernetes secret access, mailbox forwarding, high-priority product alerts and active vulnerabilities, credential access, port scans, rapid API enumeration, and mailbox-alias signup bursts. URL-encoded payloads are inspected through two decoding layers. Burst rules group by source and use explicit time windows; an isolated privileged login is not an attack finding.
+
+Login histories usable by the dashboard are a narrower subset: CSV, JSON/JSONL (including nested identity-provider outcomes), SSH auth logs, auditd login records, and Windows Security CSV/XML exports. Other security logs still receive findings without being converted into login events. Native binary EVTX, compressed archives, arbitrary vendor schema variations, and every event type within each format are **not** fully parsed.
+
+### Sample-corpus regression checks
+
+The test fixtures are unchanged copies from [LogTriage's security-log-samples](https://github.com/logtriage-cyber/security-log-samples), pinned to commit `7418e5d56ab82f6d31b349eb512a666c9610a3c6`. Attribution: **LogTriage (https://logtriage.app)**, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); the license and citation are included with the fixtures.
+
+The corpus contains **114 synthetic samples across 52 formats: 60 malicious and 54 benign**. Regression tests verify fixture hashes, require scenario-specific findings and evidence for each malicious sample, and require no rule findings for each benign sample. Uploads are renamed in tests so directory labels and suggestive filenames cannot drive detection. These are file-level rule tests, not proof of catching every attack or every bad event. Anomaly-model rankings are separate and may flag unusual behavior in benign histories.
 
 Scanning is pattern-based, not antivirus: findings can be false positives, and a file without findings is not necessarily safe. Archive contents are not unpacked and binary formats are not fully analyzed. The login model ranks successful logins using four signals and a dataset-relative threshold; tied scores can flag more events than the selected percentage. It is not independently validated on real-world labeled data. Treat scores as review leads, not proof of compromise.
 

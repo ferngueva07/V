@@ -1,0 +1,21 @@
+<134>1 2024-03-15T02:10:01.000Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= MAC=aa:bb:cc:dd:ee:ff SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=22 SYN
+<134>1 2024-03-15T02:10:01.123Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=23 SYN
+<134>1 2024-03-15T02:10:01.200Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=80 SYN
+<134>1 2024-03-15T02:10:01.300Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=443 SYN
+<134>1 2024-03-15T02:10:01.400Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=3306 SYN
+<134>1 2024-03-15T02:10:01.500Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=5432 SYN
+<134>1 2024-03-15T02:10:01.600Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=6379 SYN
+<134>1 2024-03-15T02:10:01.700Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=27017 SYN
+<134>1 2024-03-15T02:10:01.800Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=8080 SYN
+<134>1 2024-03-15T02:10:01.900Z firewall-01 kernel - - [BLOCK] IN=eth0 OUT= SRC=198.51.100.26 DST=10.0.0.1 PROTO=TCP DPT=8443 SYN
+<34>1 2024-03-15T02:10:05.000Z web-01 sshd 3821 - Failed password for root from 198.51.100.26 port 54123 ssh2
+<34>1 2024-03-15T02:10:06.100Z web-01 sshd 3821 - Failed password for root from 198.51.100.26 port 54124 ssh2
+<34>1 2024-03-15T02:10:07.200Z web-01 sshd 3821 - Failed password for admin from 198.51.100.26 port 54125 ssh2
+<34>1 2024-03-15T02:10:08.300Z web-01 sshd 3821 - Invalid user pi from 198.51.100.26 port 54126
+<34>1 2024-03-15T02:10:09.400Z web-01 sshd 3821 - Invalid user ubuntu from 198.51.100.26 port 54127
+<34>1 2024-03-15T02:10:10.500Z web-01 sshd 3821 - Failed password for root from 198.51.100.26 port 54128 ssh2
+<34>1 2024-03-15T02:10:11.600Z web-01 sshd 3821 - Failed password for oracle from 198.51.100.26 port 54129 ssh2
+<34>1 2024-03-15T02:10:12.700Z web-01 sshd 3821 - Invalid user testuser from 198.51.100.26 port 54130
+<34>1 2024-03-15T02:10:13.800Z web-01 sshd 3821 - Failed password for postgres from 198.51.100.26 port 54131 ssh2
+<34>1 2024-03-15T02:10:14.900Z web-01 sshd 3821 - Failed password for ansible from 198.51.100.26 port 54132 ssh2
+<11>1 2024-03-15T02:10:20.000Z web-01 sshd 3821 - error: maximum authentication attempts exceeded for root from 198.51.100.26 port 54133 ssh2

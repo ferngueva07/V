@@ -1,0 +1,20 @@
+/usr/sbin/mysqld, Version: 8.0.36 (MySQL Community Server - GPL). started with:
+Tcp port: 3306  Unix socket: /var/run/mysqld/mysqld.sock
+Time                 Id Command    Argument
+# Time: 2024-01-15T09:00:01.412871Z
+# User@Host: app_user[app_user] @ app-server [10.0.0.10]  Id:    12
+# Query_time: 0.045213  Lock_time: 0.000112 Rows_sent: 25  Rows_examined: 25
+use shop;
+SET timestamp=1705309201;
+SELECT id, name, email FROM users WHERE active=1 LIMIT 25;
+# Time: 2024-01-15T09:01:00.098311Z
+# User@Host: app_user[app_user] @ app-server [10.0.0.10]  Id:    12
+# Query_time: 0.123007  Lock_time: 0.000204 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1705309260;
+INSERT INTO sessions (user_id, token, created_at) VALUES (42, 'abc123', NOW());
+# Time: 2024-01-15T09:02:02.345120Z
+# User@Host: reporting[reporting] @ report-server [10.0.0.20]  Id:    31
+# Query_time: 2.345098  Lock_time: 0.000031 Rows_sent: 30  Rows_examined: 10000
+use shop;
+SET timestamp=1705309320;
+SELECT COUNT(*), DATE(created_at) FROM orders GROUP BY DATE(created_at) ORDER BY 2 DESC LIMIT 30;

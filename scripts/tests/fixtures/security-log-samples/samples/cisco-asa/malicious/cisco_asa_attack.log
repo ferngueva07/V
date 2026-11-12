@@ -1,0 +1,8 @@
+Jan 15 2024 14:30:01 asa-fw-01 : %ASA-2-106001: Inbound TCP connection denied from 198.51.100.25/54321 to 10.0.0.50/22 flags SYN  on interface outside
+Jan 15 2024 14:30:05 asa-fw-01 : %ASA-2-106001: Inbound TCP connection denied from 198.51.100.25/54322 to 10.0.0.50/22 flags SYN  on interface outside
+Jan 15 2024 14:30:10 asa-fw-01 : %ASA-2-106001: Inbound TCP connection denied from 198.51.100.25/54323 to 10.0.0.50/22 flags SYN  on interface outside
+Jan 15 2024 14:32:00 asa-fw-01 : %ASA-4-106023: Deny tcp src outside:198.51.100.25/54400 dst inside:10.0.0.100/443 by access-group "outside_access_in" [0x0, 0x0]
+Jan 15 2024 14:33:00 asa-fw-01 : %ASA-4-338005: Dynamic filter dropped blacklisted TCP traffic from outside:198.51.100.8/44000 (198.51.100.8/44000) to inside:10.0.0.100/80 (10.0.0.100/80), source malicious address resolved from dynamic list: scan-node.example, threat-level: very-high, category: Botnet
+Jan 15 2024 14:35:00 asa-fw-01 : %ASA-4-338006: Dynamic filter dropped blacklisted TCP traffic from inside:10.0.0.50/49733 (198.51.100.20/49733) to outside:198.51.100.8/443 (198.51.100.8/443), destination malicious address resolved from dynamic list: c2-relay.example, threat-level: very-high, category: Malware
+Jan 15 2024 14:36:00 asa-fw-01 : %ASA-3-106014: Deny inbound icmp src outside:198.51.100.25 dst inside:10.0.0.50 (type 8, code 0)
+Jan 15 2024 14:37:00 asa-fw-01 : %ASA-2-106016: Deny IP spoof from (198.51.100.25) to 10.0.0.50 on interface outside.

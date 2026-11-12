@@ -1,0 +1,5 @@
+Jan 15 14:30:01 lb-01 haproxy[1234]: 198.51.100.25:55001 [15/Jan/2024:14:30:01.000] frontend-https backend-api/app-01 1/0/2/45/48 403 89 - - ---- 50/50/10/5/0 0/0 "GET /admin/config HTTP/1.1"
+Jan 15 14:30:02 lb-01 haproxy[1234]: 198.51.100.25:55002 [15/Jan/2024:14:30:02.000] frontend-https backend-api/app-01 1/0/3/12/16 403 89 - - ---- 51/51/10/5/0 0/0 "GET /admin/users HTTP/1.1"
+Jan 15 14:30:03 lb-01 haproxy[1234]: 198.51.100.8:55003 [15/Jan/2024:14:30:03.000] frontend-https backend-api/app-01 1/0/2/8/11 401 45 - - ---- 52/52/10/5/0 0/0 "POST /api/v1/login HTTP/1.1"
+Jan 15 14:30:04 lb-01 haproxy[1234]: 198.51.100.8:55004 [15/Jan/2024:14:30:04.000] frontend-https backend-api/app-01 1/0/5/890/896 200 524288 - - ---- 53/53/10/5/0 0/0 "POST /api/v1/data/export HTTP/1.1"
+Jan 15 14:30:05 lb-01 haproxy[1234]: 198.51.100.25:55005 [15/Jan/2024:14:30:05.120] frontend-https frontend-https/<NOSRV> 0/-1/-1/-1/0 403 192 - - PR-- 54/54/0/0/0 0/0 "GET /.env HTTP/1.1"

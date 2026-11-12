@@ -1,0 +1,8 @@
+CEF:0|Palo Alto Networks|PAN-OS|10.1|end|TRAFFIC|1|src=10.0.1.10 dst=198.51.100.18 dpt=443 spt=52341 proto=TCP act=allow duser=alice rt=1705240800000 deviceExternalId=PA-FW-01
+CEF:0|Palo Alto Networks|PAN-OS|10.1|end|TRAFFIC|1|src=10.0.1.11 dst=198.51.100.9 dpt=443 spt=52342 proto=TCP act=allow duser=bob rt=1705240860000 deviceExternalId=PA-FW-01
+CEF:0|Palo Alto Networks|PAN-OS|10.1|end|TRAFFIC|1|src=10.0.2.100 dst=10.0.1.50 dpt=8080 spt=44501 proto=TCP act=allow duser=svc-monitor rt=1705240920000 deviceExternalId=PA-FW-01
+CEF:0|Palo Alto Networks|PAN-OS|10.1|end|TRAFFIC|1|src=10.0.1.12 dst=198.51.100.21 dpt=443 spt=52343 proto=TCP act=allow duser=carol rt=1705240980000 deviceExternalId=PA-FW-01
+CEF:0|Palo Alto Networks|PAN-OS|10.1|end|TRAFFIC|1|src=10.0.1.10 dst=198.51.100.1 dpt=53 spt=52344 proto=UDP act=allow duser=alice rt=1705241040000 deviceExternalId=PA-FW-01
+CEF:0|Palo Alto Networks|PAN-OS|10.1|end|TRAFFIC|1|src=10.0.2.101 dst=10.0.1.51 dpt=5432 spt=44502 proto=TCP act=allow duser=svc-api rt=1705241100000 deviceExternalId=PA-FW-01
+CEF:0|Palo Alto Networks|PAN-OS|10.1|end|TRAFFIC|1|src=10.0.1.13 dst=198.51.100.19 dpt=443 spt=52345 proto=TCP act=allow duser=dave rt=1705241160000 deviceExternalId=PA-FW-01
+CEF:0|Palo Alto Networks|PAN-OS|10.1|end|TRAFFIC|1|src=10.0.3.5 dst=10.0.1.50 dpt=9090 spt=44503 proto=TCP act=allow duser=prometheus rt=1705241220000 deviceExternalId=PA-FW-01

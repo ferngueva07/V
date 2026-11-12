@@ -1,0 +1,9 @@
+01/15-14:32:01.234567  [**] [1:2001219:19] ET SCAN Potential SSH Scan [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 198.51.100.25:54321 -> 10.0.0.50:22
+01/15-14:32:02.345678  [**] [1:2001219:19] ET SCAN Potential SSH Scan [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 198.51.100.25:54322 -> 10.0.0.50:22
+01/15-14:32:03.456789  [**] [1:2036252:1] ET SCAN RDP Connection Attempt from Nmap [**] [Classification: Detection of a Network Scan] [Priority: 3] {TCP} 198.51.100.25:54323 -> 10.0.0.50:3389
+01/15-14:32:10.000000  [**] [1:2006446:15] ET WEB_SERVER Possible SQL Injection Attempt UNION SELECT in HTTP URI [**] [Classification: Web Application Attack] [Priority: 1] {TCP} 198.51.100.25:54400 -> 10.0.0.50:80
+01/15-14:32:11.100000  [**] [1:2006446:15] ET WEB_SERVER Possible SQL Injection Attempt UNION SELECT in HTTP URI [**] [Classification: Web Application Attack] [Priority: 1] {TCP} 198.51.100.25:54401 -> 10.0.0.50:80
+01/15-14:32:25.400000  [**] [1:2009358:5] ET SCAN Nmap Scripting Engine User-Agent Detected (Nmap Scripting Engine) [**] [Classification: Web Application Attack] [Priority: 1] {TCP} 198.51.100.25:54500 -> 10.0.0.50:80
+01/15-14:33:00.000000  [**] [1:2024218:3] ET EXPLOIT Possible ETERNALBLUE MS17-010 Echo Response [**] [Classification: A Network Trojan was Detected] [Priority: 1] {TCP} 10.0.0.50:445 -> 198.51.100.25:54610
+01/15-14:35:15.200000  [**] [1:2032274:2] ET TROJAN Cobalt Strike Beacon Activity [**] [Classification: A Network Trojan was Detected] [Priority: 1] {TCP} 10.0.0.50:49152 -> 198.51.100.8:80
+01/15-14:36:30.500000  [**] [1:2014530:4] ET TROJAN Metasploit Meterpreter stdapi_* Command Request [**] [Classification: Successful User Privilege Gain] [Priority: 1] {TCP} 198.51.100.8:4444 -> 10.0.0.50:50000

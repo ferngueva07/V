@@ -1,0 +1,10 @@
+[Mon Oct 26 06:25:01.334891 2026] [mpm_event:notice] [pid 812:tid 140245006116736] AH00489: Apache/2.4.58 (Ubuntu) configured -- resuming normal operations
+[Mon Oct 26 06:25:01.334957 2026] [core:notice] [pid 812:tid 140245006116736] AH00094: Command line: '/usr/sbin/apache2'
+[Mon Oct 26 09:12:44.571203 2026] [php:warn] [pid 1102:tid 140244913862208] [client 192.0.2.14:52210] PHP Warning:  Undefined array key "page" in /var/www/html/index.php on line 27, referer: https://shop.example.com/
+[Mon Oct 26 09:12:47.903377 2026] [php:warn] [pid 1102:tid 140244905469504] [client 192.0.2.14:52212] PHP Warning:  Undefined array key "page" in /var/www/html/index.php on line 27, referer: https://shop.example.com/catalog
+[Mon Oct 26 10:31:05.118460 2026] [php:warn] [pid 1103:tid 140244897076800] [client 192.0.2.88:40133] PHP Warning:  Undefined variable $discount in /var/www/html/cart.php on line 61, referer: https://shop.example.com/cart
+[Mon Oct 26 11:47:20.442915 2026] [auth_basic:error] [pid 1104:tid 140244888684096] [client 192.0.2.44:58001] AH01617: user editor: authentication failure for "/admin/": Password Mismatch
+[Mon Oct 26 13:05:52.760118 2026] [php:warn] [pid 1105:tid 140244880291392] [client 192.0.2.61:47280] PHP Warning:  Undefined array key "sort" in /var/www/html/catalog.php on line 112, referer: https://shop.example.com/catalog?sort=
+[Mon Oct 26 15:22:09.004833 2026] [php:warn] [pid 1106:tid 140244871898688] [client 192.0.2.88:40877] PHP Warning:  Undefined variable $discount in /var/www/html/cart.php on line 61, referer: https://shop.example.com/cart
+[Mon Oct 26 17:40:31.215746 2026] [php:warn] [pid 1107:tid 140244863505984] [client 192.0.2.19:51066] PHP Warning:  Undefined array key "page" in /var/www/html/index.php on line 27, referer: https://shop.example.com/
+[Mon Oct 26 19:58:14.689052 2026] [php:warn] [pid 1108:tid 140244855113280] [client 192.0.2.61:47912] PHP Warning:  Undefined array key "sort" in /var/www/html/catalog.php on line 112, referer: https://shop.example.com/catalog?sort=

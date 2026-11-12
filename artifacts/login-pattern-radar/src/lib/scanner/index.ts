@@ -2,11 +2,13 @@ import { analyze, type ModelParams } from "../anomaly/pipeline";
 import type { AnalysisResult, LoginEvent, ScoredRow } from "../anomaly/types";
 import { MAX_SCAN_BYTES, scanContent, severityRank, type Finding, type Severity } from "./content-scan";
 import { parseLoginLog, type LogFormat } from "./log-parsers";
+import { scanSecurityLog } from "./security-log";
 
 export type { Finding, Severity } from "./content-scan";
 
 const BRUTE_FORCE_FAILURES = 10;
 const SPRAY_USERS = 5;
+const FAILURE_WINDOW_MS = 10 * 60_000;
 const IP_RE = /^(?:\d{1,3}(?:\.\d{1,3}){3}|[0-9a-f]*:[0-9a-f:]+)(?::\d+)?$/i;
 const PRIVILEGED_USERS = new Set(["root", "admin", "administrator", "sa", "oracle", "postgres"]);
 
@@ -39,20 +41,46 @@ const FORMAT_LABEL: Record<LogFormat, string> = {
   "windows-security": "Windows Security log",
   json: "JSON / JSONL log",
   "auth-log": "Linux auth.log (sshd)",
+  auditd: "Linux auditd",
 };
 export const formatLabel = (f: LogFormat) => FORMAT_LABEL[f];
 
 /** Rule-based login checks that do not depend on the anomaly model. */
 export function loginHeuristics(events: LoginEvent[]): Finding[] {
   const findings: Finding[] = [];
-  const bySource = new Map<string, { failures: number; users: Set<string>; successAfter: string[] }>();
+  const bySource = new Map<string, {
+    failures: number; users: number; sampleUsers: string[]; successAfter: string[];
+    recent: { user: string; time: number }[]; start: number; userCounts: Map<string, number>;
+  }>();
+  const privileged: LoginEvent[] = [];
+  const spraySuccess: LoginEvent[] = [];
   for (const e of [...events].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))) {
     const key = e.location || "unknown";
-    const s = bySource.get(key) ?? { failures: 0, users: new Set<string>(), successAfter: [] };
+    const s = bySource.get(key) ?? { failures: 0, users: 0, sampleUsers: [], successAfter: [], recent: [], start: 0, userCounts: new Map<string, number>() };
+    const now = Date.parse(e.timestamp);
+    while (s.start < s.recent.length && now - s.recent[s.start]!.time > FAILURE_WINDOW_MS) {
+      const user = s.recent[s.start++]!.user;
+      const count = s.userCounts.get(user)! - 1;
+      if (count) s.userCounts.set(user, count); else s.userCounts.delete(user);
+    }
     if (!e.success) {
-      s.failures++;
-      s.users.add(e.userId);
-    } else if (s.failures >= BRUTE_FORCE_FAILURES) s.successAfter.push(`${e.userId} at ${e.timestamp}`);
+      s.recent.push({ user: e.userId, time: now });
+      s.userCounts.set(e.userId, (s.userCounts.get(e.userId) ?? 0) + 1);
+      s.failures = Math.max(s.failures, s.recent.length - s.start);
+      if (s.userCounts.size > s.users) {
+        s.users = s.userCounts.size;
+        s.sampleUsers = [];
+        for (const user of s.userCounts.keys()) {
+          s.sampleUsers.push(user);
+          if (s.sampleUsers.length === 4) break;
+        }
+      }
+    } else {
+      const failures = s.recent.length - s.start;
+      if (failures >= BRUTE_FORCE_FAILURES && s.successAfter.length < 5) s.successAfter.push(`${e.userId} at ${e.timestamp} (${failures} preceding failures)`);
+      if (IP_RE.test(key) && s.userCounts.size >= SPRAY_USERS) spraySuccess.push(e);
+      if (IP_RE.test(key) && failures >= 5 && PRIVILEGED_USERS.has(e.userId.toLowerCase())) privileged.push(e);
+    }
     bySource.set(key, s);
   }
   // Only IP sources identify a single attacker; city-level locations are shared by many users.
@@ -62,7 +90,7 @@ export function loginHeuristics(events: LoginEvent[]): Finding[] {
   if (compromised.length) {
     findings.push({
       ruleId: "brute-force-success", title: "Successful login after brute force", severity: "critical", category: "login",
-      description: `A source with ${BRUTE_FORCE_FAILURES}+ failed attempts later logged in successfully — the account may be compromised.`,
+      description: `A source with ${BRUTE_FORCE_FAILURES}+ failed attempts in the preceding 10 minutes logged in successfully. Investigate possible compromise.`,
       count: compromised.length,
       samples: compromised.slice(0, 5).map(([src, s]) => ({ text: `${src}: ${s.failures} failures, then success as ${s.successAfter[0]}` })),
     });
@@ -71,25 +99,32 @@ export function loginHeuristics(events: LoginEvent[]): Finding[] {
   if (brute.length) {
     findings.push({
       ruleId: "brute-force", title: "Brute-force source", severity: "high", category: "login",
-      description: `Sources with ${BRUTE_FORCE_FAILURES} or more failed login attempts.`,
+      description: `Sources with ${BRUTE_FORCE_FAILURES} or more failed login attempts within 10 minutes.`,
       count: brute.length,
-      samples: brute.slice(0, 5).map(([src, s]) => ({ text: `${src}: ${s.failures} failed attempts against ${s.users.size} account(s)` })),
+      samples: brute.slice(0, 5).map(([src, s]) => ({ text: `${src}: peak of ${s.failures} failures within 10 minutes; up to ${s.users} account(s) targeted in a window` })),
     });
   }
-  const spray = ranked.filter(([, s]) => s.users.size >= SPRAY_USERS).sort((a, b) => b[1].users.size - a[1].users.size);
+  const spray = ranked.filter(([, s]) => s.users >= SPRAY_USERS).sort((a, b) => b[1].users - a[1].users);
   if (spray.length) {
     findings.push({
       ruleId: "password-spray", title: "Password spraying / user enumeration", severity: "high", category: "login",
-      description: `A single source failed against ${SPRAY_USERS} or more different usernames.`,
+      description: `A single source failed against ${SPRAY_USERS} or more different usernames within 10 minutes.`,
       count: spray.length,
-      samples: spray.slice(0, 5).map(([src, s]) => ({ text: `${src}: tried ${s.users.size} usernames (${[...s.users].slice(0, 4).join(", ")}${s.users.size > 4 ? ", …" : ""})` })),
+      samples: spray.slice(0, 5).map(([src, s]) => ({ text: `${src}: tried ${s.users} usernames within 10 minutes (${s.sampleUsers.join(", ")}${s.users > 4 ? ", …" : ""})` })),
     });
   }
-  const privileged = events.filter((e) => e.success && PRIVILEGED_USERS.has(e.userId.toLowerCase()));
+  if (spraySuccess.length) {
+    findings.push({
+      ruleId: "password-spray-success", title: "Successful login after password spraying", severity: "critical", category: "login",
+      description: `A source that failed against ${SPRAY_USERS}+ usernames within the preceding 10 minutes recorded a successful login. Check MFA and session issuance before concluding compromise.`,
+      count: spraySuccess.length,
+      samples: spraySuccess.slice(0, 5).map((e) => ({ text: `${e.userId} from ${e.location} at ${e.timestamp}` })),
+    });
+  }
   if (privileged.length) {
     findings.push({
-      ruleId: "privileged-login", title: "Direct privileged-account login", severity: "medium", category: "login",
-      description: "Successful logins straight into root/administrator-style accounts, which should normally be disabled for remote access.",
+      ruleId: "privileged-login", title: "Privileged-account login after repeated failures", severity: "high", category: "login",
+      description: "A root/administrator-style account logged in from a source with at least 5 failures in the preceding 10 minutes. A privileged login alone is not treated as an attack.",
       count: privileged.length,
       samples: privileged.slice(0, 5).map((e) => ({ text: `${e.userId} from ${e.location} at ${e.timestamp}` })),
     });
@@ -118,7 +153,7 @@ export async function scanFile(file: Pick<File, "name" | "size" | "slice">): Pro
     const content = scanContent(file.name, bytes);
     const log = content.text ? parseLoginLog(content.text, file.name) : null;
     const events = log?.events ?? [];
-    const findings = [...content.findings, ...loginHeuristics(events)].sort((a, b) => severityRank(a.severity) - severityRank(b.severity));
+    const findings = [...content.findings, ...(content.text ? scanSecurityLog(content.text) : []), ...loginHeuristics(events)].sort((a, b) => severityRank(a.severity) - severityRank(b.severity));
     return {
       report: { ...base, sha256: hash, kind: content.kind, logFormat: log?.format ?? null, loginEvents: events.length, skippedLogRecords: log?.skipped ?? 0, findings, worst: worstOf(findings) },
       events,

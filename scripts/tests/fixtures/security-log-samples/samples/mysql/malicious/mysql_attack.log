@@ -1,0 +1,20 @@
+/usr/sbin/mysqld, Version: 8.0.36 (MySQL Community Server - GPL). started with:
+Tcp port: 3306  Unix socket: /var/run/mysqld/mysqld.sock
+Time                 Id Command    Argument
+# Time: 2024-01-15T14:30:13.456211Z
+# User@Host: webapp[webapp] @  [198.51.100.25]  Id:  8812
+# Query_time: 12.456003  Lock_time: 0.000098 Rows_sent: 50000  Rows_examined: 5000000
+use shop;
+SET timestamp=1705329001;
+SELECT * FROM users WHERE 1=1 UNION SELECT username,password,email,4,5,6,7 FROM admin_users;
+# Time: 2024-01-15T14:31:08.234870Z
+# User@Host: root[root] @ localhost []  Id:  8820
+# Query_time: 8.234511  Lock_time: 0.000187 Rows_sent: 10000  Rows_examined: 1000000
+SET timestamp=1705329060;
+SELECT * FROM credit_cards LIMIT 10000;
+# Time: 2024-01-15T14:32:15.789402Z
+# User@Host: webapp[webapp] @  [198.51.100.8]  Id:  8831
+# Query_time: 15.789254  Lock_time: 15.701332 Rows_sent: 0  Rows_examined: 0
+use shop;
+SET timestamp=1705329120;
+DROP TABLE audit_log, user_sessions;

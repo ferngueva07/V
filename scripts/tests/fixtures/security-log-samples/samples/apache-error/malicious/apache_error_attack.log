@@ -1,0 +1,43 @@
+[Tue Oct 27 02:14:03.112233 2026] [mpm_event:notice] [pid 812:tid 140245006116736] AH00489: Apache/2.4.58 (Ubuntu) configured -- resuming normal operations
+[Tue Oct 27 02:14:03.112298 2026] [core:notice] [pid 812:tid 140245006116736] AH00094: Command line: '/usr/sbin/apache2'
+[Tue Oct 27 03:41:10.204511 2026] [authz_core:error] [pid 1931:tid 140244913862208] [client 198.51.100.23:50412] AH01630: client denied by server configuration: /var/www/html/.env
+[Tue Oct 27 03:41:10.388102 2026] [authz_core:error] [pid 1931:tid 140244905469504] [client 198.51.100.23:50414] AH01630: client denied by server configuration: /var/www/html/.env.production
+[Tue Oct 27 03:41:10.571930 2026] [authz_core:error] [pid 1931:tid 140244897076800] [client 198.51.100.23:50418] AH01630: client denied by server configuration: /var/www/html/.git/config
+[Tue Oct 27 03:41:10.760455 2026] [authz_core:error] [pid 1931:tid 140244888684096] [client 198.51.100.23:50420] AH01630: client denied by server configuration: /var/www/html/.aws/credentials
+[Tue Oct 27 03:41:11.031277 2026] [php:error] [pid 1932:tid 140244880291392] [client 198.51.100.23:50426] script '/var/www/html/wp-login.php' not found or unable to stat
+[Tue Oct 27 03:41:11.205581 2026] [php:error] [pid 1932:tid 140244871898688] [client 198.51.100.23:50430] script '/var/www/html/phpinfo.php' not found or unable to stat
+[Tue Oct 27 03:41:11.389114 2026] [php:error] [pid 1932:tid 140244863505984] [client 198.51.100.23:50432] script '/var/www/html/xmlrpc.php' not found or unable to stat
+[Tue Oct 27 03:41:11.567302 2026] [php:error] [pid 1932:tid 140244855113280] [client 198.51.100.23:50436] script '/var/www/html/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php' not found or unable to stat
+[Tue Oct 27 03:41:11.742918 2026] [php:error] [pid 1932:tid 140244846720576] [client 198.51.100.23:50440] script '/var/www/html/phpmyadmin/index.php' not found or unable to stat
+[Tue Oct 27 03:41:12.020466 2026] [core:error] [pid 1933:tid 140244838327872] [client 198.51.100.23:50444] AH00126: Invalid URI in request '/../../../../etc/passwd' 'GET /../../../../etc/passwd HTTP/1.1'
+[Tue Oct 27 03:41:12.205118 2026] [authz_core:error] [pid 1933:tid 140244829935168] [client 198.51.100.23:50448] AH01630: client denied by server configuration: /var/www/html/server-status
+[Tue Oct 27 03:52:40.617340 2026] [php:error] [pid 1934:tid 140244821542464] [client 203.0.113.77:41022] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ''1'' OR 1=1-- -' at line 1 in /var/www/html/search.php:42
+Stack trace:
+#0 /var/www/html/search.php(42): mysqli_query()
+#1 {main}
+  thrown in /var/www/html/search.php on line 42, referer: https://shop.example.com/search?q=1%27%20OR%201%3D1--%20-
+[Tue Oct 27 04:02:11.104203 2026] [auth_basic:error] [pid 1935:tid 140244813149760] [client 203.0.113.50:61002] AH01617: user admin: authentication failure for "/admin/": Password Mismatch
+[Tue Oct 27 04:02:11.951640 2026] [auth_basic:error] [pid 1935:tid 140244804757056] [client 203.0.113.50:61004] AH01617: user admin: authentication failure for "/admin/": Password Mismatch
+[Tue Oct 27 04:02:12.802775 2026] [auth_basic:error] [pid 1935:tid 140244796364352] [client 203.0.113.50:61008] AH01617: user admin: authentication failure for "/admin/": Password Mismatch
+[Tue Oct 27 04:02:13.643310 2026] [auth_basic:error] [pid 1935:tid 140244787971648] [client 203.0.113.50:61010] AH01617: user admin: authentication failure for "/admin/": Password Mismatch
+[Tue Oct 27 04:02:14.497652 2026] [auth_basic:error] [pid 1935:tid 140244779578944] [client 203.0.113.50:61014] AH01617: user admin: authentication failure for "/admin/": Password Mismatch
+[Tue Oct 27 04:02:15.338021 2026] [auth_basic:error] [pid 1935:tid 140244771186240] [client 203.0.113.50:61016] AH01617: user admin: authentication failure for "/admin/": Password Mismatch
+[Tue Oct 27 04:02:16.180933 2026] [auth_basic:error] [pid 1936:tid 140244762793536] [client 203.0.113.50:61020] AH01617: user admin: authentication failure for "/admin/": Password Mismatch
+[Tue Oct 27 04:02:17.025548 2026] [auth_basic:error] [pid 1936:tid 140244754400832] [client 203.0.113.50:61022] AH01617: user admin: authentication failure for "/admin/": Password Mismatch
+[Tue Oct 27 04:02:17.864107 2026] [auth_basic:error] [pid 1936:tid 140244746008128] [client 203.0.113.50:61026] AH01618: user root not found: /admin/
+[Tue Oct 27 04:02:18.701296 2026] [auth_basic:error] [pid 1936:tid 140244737615424] [client 203.0.113.50:61028] AH01618: user root not found: /admin/
+[Tue Oct 27 04:02:19.553871 2026] [auth_basic:error] [pid 1936:tid 140244729222720] [client 203.0.113.50:61032] AH01618: user root not found: /admin/
+[Tue Oct 27 04:02:20.395410 2026] [auth_basic:error] [pid 1936:tid 140244720830016] [client 203.0.113.50:61034] AH01618: user root not found: /admin/
+[Tue Oct 27 04:02:21.242669 2026] [auth_basic:error] [pid 1937:tid 140244712437312] [client 203.0.113.50:61038] AH01618: user root not found: /admin/
+[Tue Oct 27 04:02:22.087015 2026] [auth_basic:error] [pid 1937:tid 140244704044608] [client 203.0.113.50:61040] AH01618: user administrator not found: /admin/
+[Tue Oct 27 04:02:22.930552 2026] [auth_basic:error] [pid 1937:tid 140244695651904] [client 203.0.113.50:61044] AH01618: user administrator not found: /admin/
+[Tue Oct 27 04:02:23.774118 2026] [auth_basic:error] [pid 1937:tid 140244687259200] [client 203.0.113.50:61046] AH01618: user administrator not found: /admin/
+[Tue Oct 27 04:02:24.619844 2026] [auth_basic:error] [pid 1937:tid 140244678866496] [client 203.0.113.50:61050] AH01618: user administrator not found: /admin/
+[Tue Oct 27 04:02:25.468203 2026] [auth_basic:error] [pid 1938:tid 140244670473792] [client 203.0.113.50:61052] AH01618: user test not found: /admin/
+[Tue Oct 27 04:02:26.312497 2026] [auth_basic:error] [pid 1938:tid 140244662081088] [client 203.0.113.50:61056] AH01618: user test not found: /admin/
+[Tue Oct 27 04:02:27.159926 2026] [auth_basic:error] [pid 1938:tid 140244653688384] [client 203.0.113.50:61058] AH01618: user test not found: /admin/
+[Tue Oct 27 04:02:28.001470 2026] [auth_basic:error] [pid 1938:tid 140244645295680] [client 203.0.113.50:61062] AH01618: user backup not found: /admin/
+[Tue Oct 27 04:02:28.846339 2026] [auth_basic:error] [pid 1938:tid 140244636902976] [client 203.0.113.50:61064] AH01618: user backup not found: /admin/
+[Tue Oct 27 04:02:29.690785 2026] [auth_basic:error] [pid 1939:tid 140244628510272] [client 203.0.113.50:61068] AH01618: user webmaster not found: /admin/
+[Tue Oct 27 04:02:30.532006 2026] [auth_basic:error] [pid 1939:tid 140244620117568] [client 203.0.113.50:61070] AH01618: user webmaster not found: /admin/
+[Tue Oct 27 04:02:31.377451 2026] [auth_basic:error] [pid 1939:tid 140244611724864] [client 203.0.113.50:61074] AH01617: user admin: authentication failure for "/admin/": Password Mismatch

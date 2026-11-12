@@ -1,0 +1,7 @@
+#Software: Microsoft Internet Information Services 10.0
+#Version: 1.0
+#Date: 2024-01-15 09:00:00
+#Fields: date time s-ip cs-method cs-uri-stem cs-uri-query s-port cs-username c-ip cs(User-Agent) sc-status sc-substatus sc-win32-status time-taken sc-bytes
+2024-01-15 09:00:01 10.0.0.10 GET /index.html - 443 alice 203.0.113.10 Mozilla/5.0+(Windows+NT+10.0;+Win64;+x64)+AppleWebKit/537.36 200 0 0 46 12345
+2024-01-15 09:01:00 10.0.0.10 POST /api/v1/data - 443 alice 203.0.113.10 Mozilla/5.0+(Windows+NT+10.0;+Win64;+x64)+AppleWebKit/537.36 200 0 0 112 8192
+2024-01-15 09:02:00 10.0.0.10 GET /api/v1/users/profile - 443 bob 203.0.113.20 Mozilla/5.0+(Macintosh;+Intel+Mac+OS+X+10_15_7)+AppleWebKit/537.36 200 0 0 31 4096
